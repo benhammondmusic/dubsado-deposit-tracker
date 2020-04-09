@@ -1,0 +1,26 @@
+#store sensitive info here
+# THIS FILE IS .GITIGNORED
+
+# APP SETTINGS
+headless = 0 #whether browser doesn't display
+pauseTime = 5 # pause times to implicitly wait for website loading elements.
+
+
+login = {
+    # GMAIL SETTING (to email report)
+    'gmail_username' : 'YOUR GMAIL USERNAME',
+    'gmail_password' : 'YOUR GMAIL PASSWORD',
+
+    # DUBSADO settings
+    'dubsado_username' : "YOUR DUBSADO USERNAME",
+    'dubsado_password' : 'YOUR DUBSADO PASSWORD',
+    'loginDubsado_url' : 'https://hello.dubsado.com/user/login',
+    'currentprojectsDubsado_url' : 'https://hello.dubsado.com/projects/list/5b6f1a5d4599781f8cf10578',
+
+
+    # other settings
+    'artist_name' : 'YOUR DUBSADO BRAND/ARTIST NAME (IF MORE THAN ONE)',
+    }
+
+
+    #*************************************
