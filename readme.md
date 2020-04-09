@@ -7,6 +7,7 @@ FUTURE UPDATES/IDEAS:
 - option to auto-run program on a set time schedule so emails
 - compare amounts to a specific bank account balance
 - deal with multiple brands under one account
+- generate a statement PDF, and email client total due, along with statement PDF and all invoice PDFs (many corporate clients have trouble opening the webpage invoices and need pdf copies)
 
 
 PROBLEM: Dubsado is a great tool for artists to manage their clients and events, however it is lacking some functionality including the ability to see at a glance how much money an artist has collected in deposits. The problem was highlighted during the COVID-19 crisis when multiple clients cancelled and I wanted to be sure I had set aside the proper amount of money.
@@ -26,5 +27,5 @@ SETUP/OPERATION: User must complete the following tasks to operate program
 - change that file name to settings.py
 
 KNOWN ISSUES:
--
+- WORK IN PROGRESS -
 -
