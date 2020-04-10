@@ -5,10 +5,13 @@ from selenium.common.exceptions import TimeoutException
 from selenium import webdriver
 import re
 from datetime import datetime, date, time, timedelta
+import math
+import time
 
 #Load app settings
 import settings
 pauseTime = settings.pauseTime
+JOBS_PER_PAGE = 50.0
 
 
 #*************************************
@@ -31,10 +34,7 @@ def doLogin (aUsername, aPassword, browser, login_url):
     #*************************************
 
 #*************************************
-def doTallyPage (browser, deposits_tally, gross_tally):
-    money_amounts = browser.find_elements_by_xpath("//i[@ng-show='project.invoice.items.length']")
-    print str(len(money_amounts)) + " jobs tallied."
-
+def doTallyPage (money_amounts, deposits_tally, private_events_gross, gross_tally, number_tallied_jobs):
     for job_status in money_amounts:
         if job_status.text:
             both_moneys = job_status.text.split(" / ")
@@ -48,7 +48,15 @@ def doTallyPage (browser, deposits_tally, gross_tally):
         deposits_tally += deposit_i
         gross_tally += total_i
 
-    return (deposits_tally, gross_tally)
+        if deposit_i:
+            private_events_gross += total_i
+
+
+
+
+    number_tallied_jobs += len(money_amounts)
+
+    return (deposits_tally, private_events_gross, gross_tally, number_tallied_jobs)
         # print "DEPOSIT PAID: " + str(deposit_i)
         # print "REMAINDER DUE: " + str(remainder_i)
         # print "JOB TOTAL: " + str(total_i)
@@ -121,51 +129,42 @@ if browser.current_url != currentProjects_url:
 #ready = WebDriverWait(browser, pauseTime).until(EC.visibility_of_element_located((By.ID, 'calendar-overview')))
 
 if browser.current_url != currentProjects_url:
-    browser.get(currentProjects_url)
-    print "Loading " + currentProjects_url
-
-#except:
-#    print "Trouble Loading CURRENT PROJECTS page."
+    try:
+        browser.get(currentProjects_url)
+    except:
+        print "Trouble Loading CURRENT PROJECTS page."
 
 
 
 #TALLY MONEY FROM DISPLAYED PROJECTS
-#try:
 ready = WebDriverWait(browser, pauseTime).until(EC.visibility_of_element_located((By.XPATH, "//a[@ng-switch-when='prev']")))
-deposits_tally = gross_tally = 0
+deposits_tally = gross_tally = private_events_gross = number_tallied_jobs = 0
+job_counts = browser.find_elements_by_xpath(("//div[@class='funnel-count-number ng-binding']"))
+number_current_jobs = float(job_counts[2].text)
+number_of_pages = int(math.ceil(number_current_jobs / JOBS_PER_PAGE))
 
-tallies = doTallyPage (browser, deposits_tally, gross_tally)
+# prevButton = browser.find_element_by_xpath("//a[@ng-switch-when='prev']")
+
+for page in range(0,number_of_pages):
+    ready = WebDriverWait(browser, pauseTime).until(EC.visibility_of_element_located((By.XPATH, "//a[@ng-switch-when='prev']")))
+    money_amounts = browser.find_elements_by_xpath("//i[@ng-show='project.invoice.items.length']")
+    tallies = doTallyPage (money_amounts, deposits_tally, private_events_gross, gross_tally, number_tallied_jobs)
+    deposits_tally = tallies[0]
+    private_events_gross = tallies[1]
+    gross_tally = tallies[2]
+    number_tallied_jobs = tallies[3]
+    nextButton = browser.find_element_by_xpath("//a[@ng-switch-when='next']")
+    nextButton.click()
+    time.sleep(3)
 
 
-prevButton = browser.find_element_by_xpath("//a[@ng-switch-when='prev']")
-nextButton = browser.find_element_by_xpath("//a[@ng-switch-when='next']")
-
-nextButton.click()
-
-print "$" + str(tallies[0]) + " TOTAL DEPOSITS COLLECTED ON CURRENT PROJECTS"
-print "$" + str(tallies[1]-tallies[0]) + " TOTAL REMAINDER PAYMENTS DUE ON CURRENT PROJECTS"
+print str(number_tallied_jobs) + " current jobs on " + str(number_of_pages) + " pages."
+print "$" + str(deposits_tally) + " DEPOSITS COLLECTED ON CURRENT JOBS"
+print "$" + str(gross_tally-deposits_tally) + " REMAINDER PAYMENTS DUE ON CURRENT JOBS"
 print "_____________________________"
-print "$" + str(tallies[1]) + " TOTAL GROSS FROM CURRENT PROJECTS"
-
-
-
-# cycle through remainging pages of current PROJECTS
-
-
-
-
-#except:
-#    print "Trouble TALLYING CURRENT PROJECTS ON THIS PAGE."
-
-
-
-
-
-
-
-
-print "Done"
-
+print "$" + str(gross_tally) + " GROSS - ALL CURRENT JOBS ( INCL $" + str(private_events_gross) + " FROM CONTRACTED PRIVATE EVENTS)"
+percent_privates = int(100 * float(private_events_gross)/float(gross_tally))
+print str(percent_privates) + "% OF GROSS FROM CONTRACTED EVENTS"
 print "______________________"
 print "______________________"
 print "______________________"
