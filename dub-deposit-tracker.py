@@ -35,6 +35,18 @@ def doTallyPage (browser):
     money_amounts = browser.find_elements_by_xpath("//i[@ng-show='project.invoice.items.length']")
     print str(len(money_amounts)) + " jobs tallied."
 
+    for job_status in money_amounts:
+        print job_status.text
+        both_moneys = job_status.text.split(" / ")
+        deposit = both_moneys[0].replace("$","").replace(",","")
+        deposit_i = int(deposit)
+        total_i = int(both_moneys[1].replace("$","").replace(",",""))
+        remainder_i = total_i - deposit_i
+        print "DEPOSIT PAID: " + str(deposit_i)
+        print "REMAINDER DUE: " + str(remainder_i)
+        print "JOB TOTAL: " + str(total_i)
+
+
 
     #*************************************
 
