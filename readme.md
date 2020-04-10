@@ -27,7 +27,7 @@ SETUP/OPERATION: User must complete the following tasks to operate program
 - change that file name to settings.py
 
 KNOWN ISSUES:
-- WORK IN PROGRESS -
+- WORK IN PROGRESS - gets to "current projects" page and counts accurately (50 first page)
 -
 -
 -
