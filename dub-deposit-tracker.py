@@ -31,21 +31,27 @@ def doLogin (aUsername, aPassword, browser, login_url):
     #*************************************
 
 #*************************************
-def doTallyPage (browser):
+def doTallyPage (browser, deposits_tally, gross_tally):
     money_amounts = browser.find_elements_by_xpath("//i[@ng-show='project.invoice.items.length']")
     print str(len(money_amounts)) + " jobs tallied."
 
     for job_status in money_amounts:
-        print job_status.text
-        both_moneys = job_status.text.split(" / ")
-        deposit = both_moneys[0].replace("$","").replace(",","")
-        deposit_i = int(deposit)
-        total_i = int(both_moneys[1].replace("$","").replace(",",""))
-        remainder_i = total_i - deposit_i
-        print "DEPOSIT PAID: " + str(deposit_i)
-        print "REMAINDER DUE: " + str(remainder_i)
-        print "JOB TOTAL: " + str(total_i)
+        if job_status.text:
+            both_moneys = job_status.text.split(" / ")
+            deposit = both_moneys[0].replace("$","").replace(",","")
+            deposit_i = int(deposit)
+            total_i = int(both_moneys[1].replace("$","").replace(",",""))
+            remainder_i = total_i - deposit_i
+        else:
+            deposit_i = total_i = remainder_i = 0
 
+        deposits_tally += deposit_i
+        gross_tally += total_i
+
+    return (deposits_tally, gross_tally)
+        # print "DEPOSIT PAID: " + str(deposit_i)
+        # print "REMAINDER DUE: " + str(remainder_i)
+        # print "JOB TOTAL: " + str(total_i)
 
 
     #*************************************
@@ -126,13 +132,27 @@ if browser.current_url != currentProjects_url:
 #TALLY MONEY FROM DISPLAYED PROJECTS
 #try:
 ready = WebDriverWait(browser, pauseTime).until(EC.visibility_of_element_located((By.XPATH, "//a[@ng-switch-when='prev']")))
+deposits_tally = gross_tally = 0
+
+tallies = doTallyPage (browser, deposits_tally, gross_tally)
 
 
 prevButton = browser.find_element_by_xpath("//a[@ng-switch-when='prev']")
 nextButton = browser.find_element_by_xpath("//a[@ng-switch-when='next']")
 
+nextButton.click()
 
-doTallyPage (browser)
+print "$" + str(tallies[0]) + " TOTAL DEPOSITS COLLECTED ON CURRENT PROJECTS"
+print "$" + str(tallies[1]-tallies[0]) + " TOTAL REMAINDER PAYMENTS DUE ON CURRENT PROJECTS"
+print "_____________________________"
+print "$" + str(tallies[1]) + " TOTAL GROSS FROM CURRENT PROJECTS"
+
+
+
+# cycle through remainging pages of current PROJECTS
+
+
+
 
 #except:
 #    print "Trouble TALLYING CURRENT PROJECTS ON THIS PAGE."
